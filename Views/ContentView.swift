@@ -6,55 +6,53 @@ struct ContentView: View {
     @State private var showAlert = false
     
     var body: some View {
-        VStack(spacing: 40) {
+        VStack(spacing: 30) {
             Text("Mein Wecker")
                 .font(.largeTitle)
                 .bold()
             
-            // Das Apple-Typische Rad zur Zeiteinstellung
+            // macOS-kompatibler DatePicker (.graphical zeigt eine analoge Uhr, .field ein Eingabefeld)
             DatePicker("Weckzeit", selection: $selectedTime, displayedComponents: .hourAndMinute)
-                .datePickerStyle(WheelDatePickerStyle())
+                .datePickerStyle(.graphical)
                 .labelsHidden()
             
             HStack(spacing: 20) {
-                // Button zum Wecker stellen
                 Button(action: {
                     alarmManager.scheduleAlarm(for: selectedTime)
                     showAlert = true
                 }) {
                     Text("Wecker stellen")
                         .bold()
-                        .frame(width: 150, height: 50)
+                        .frame(width: 150, height: 40)
                         .background(Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
+                .buttonStyle(.plain) // Verhindert den Standard-macOS-Button-Rahmen
                 
-                // Button zum Wecker löschen
                 Button(action: {
                     alarmManager.cancelAllAlarms()
                 }) {
                     Text("Alle löschen")
                         .bold()
-                        .frame(width: 150, height: 50)
+                        .frame(width: 150, height: 40)
                         .background(Color.red)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
+                .buttonStyle(.plain)
             }
         }
-        .padding()
-        // Fragt beim Starten der Ansicht direkt nach der Berechtigung
+        .padding(30)
+        // Gibt dem Mac-Fenster und der Preview eine saubere Größe
+        .frame(minWidth: 400, minHeight: 350)
         .onAppear {
             alarmManager.requestPermission()
         }
-        // Zeigt ein kurzes Popup, wenn der Wecker gestellt wurde
-        .alert(isPresented: $showAlert) {
-            Alert(
-                title: Text("Erfolg"),
-                message: Text("Dein Wecker wurde gestellt."),
-                dismissButton: .default(Text("OK"))
-            )
+        .alert("Erfolg", isPresented: $showAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Dein Wecker wurde gestellt.")
         }
     }
 }
